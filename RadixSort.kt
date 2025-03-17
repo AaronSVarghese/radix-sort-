@@ -1,32 +1,26 @@
 object RadixSort {
-    fun sort(xs: IntArray) {
-        require(xs.all { 0 <= it })
+    fun sort(numbers: IntArray) {
+        require(numbers.all { it >= 0 }) 
         var place = 1
-        repeat(xs.maxOrNull()!!.toString().length) {
-            countingSort(xs, place)
+        val maxNumber = numbers.maxOrNull() ?: return 
+        repeat(maxNumber.toString().length) {
+            countingSort(numbers, place)
             place *= 10
         }
     }
+    private fun countingSort(numbers: IntArray, place: Int) {
+        val output = IntArray(numbers.size)
+        val count = IntArray(10) // Array to store digit counts
 
-    private fun countingSort(xs: IntArray, place: Int) {
-        val sorted = IntArray(xs.size)
-        val appearances = IntArray(10)
-        for (x in xs) appearances[getDigit(x, place)]++
-        for (i in 1 until appearances.size) appearances[i] += appearances[i - 1]
-        /**
-         * At this point,
-         * appearances[0] ... appearances of '0'
-         * appearances[1] ... appearances of '0' + appearances of '1'
-         * ⋮
-         * appearances[9] ... appearances of '0' + appearances of '1' + ... + appearances of '9'
-         */
-        for (i in xs.lastIndex downTo 0) {
-            val digit = getDigit(xs[i], place)
-            sorted[appearances[digit] - 1] = xs[i]
-            appearances[digit]--
+        numbers.forEach { count[getDigit(it, place)]++ }
+        for (i in 1 until count.size) count[i] += count[i - 1]
+
+        for (i in numbers.indices.reversed()) {
+            val digit = getDigit(numbers[i], place)
+            output[count[digit] - 1] = numbers[i]
+            count[digit]--
         }
-        sorted.copyInto(xs)
+        output.copyInto(numbers) 
     }
-
-    private fun getDigit(x: Int, place: Int) = (x / place) % 10
+    private fun getDigit(number: Int, place: Int) = (number / place) % 10
 }
